@@ -1,0 +1,618 @@
+<title>Uma luz para a Diya</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Conceito: "Diya" quer dizer lamparina. A noite começa escura e cada toque acende mais luz.
+   Uma só aposta visual: a chama. O resto fica calmo. Look único e escuro de propósito. */
+:root{
+  --night:#17101f;
+  --night-2:#2a1a38;
+  --flame:#ffb02e;
+  --ember:#ff6a3d;
+  --rose:#e5487f;
+  --cream:#f6e9d6;
+  --mute:#b9a8c6;
+  --line:rgba(246,233,214,.16);
+  --font-display:'Fraunces',Georgia,'Times New Roman',serif;
+  --font-body:'Figtree',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{
+  margin:0;background:var(--night);color:var(--cream);
+  font-family:var(--font-body);font-size:17px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit}
+#glow{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.22;transition:opacity 2.4s ease;
+  background:
+   radial-gradient(ellipse 80% 55% at 50% 100%,rgba(255,150,40,.55),transparent 70%),
+   radial-gradient(ellipse 60% 40% at 15% 0%,rgba(229,72,127,.22),transparent 70%),
+   var(--night)}
+body.lit #glow{opacity:1}
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+#app{
+  position:relative;z-index:2;height:100%;
+  display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+  padding-block:14px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  max-width:46rem;margin:0 auto;
+}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:34px}
+.dots{display:flex;gap:7px}
+.dots i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--mute);transition:all .6s ease}
+.dots i.on{background:var(--flame);border-color:var(--flame);box-shadow:0 0 10px 2px rgba(255,176,46,.55)}
+.dots i.now{transform:scale(1.35)}
+.ghost{background:none;border:0;color:var(--mute);padding:.5rem .6rem;border-radius:10px;cursor:pointer;font-size:.92rem}
+.ghost:hover{color:var(--cream)}
+.stage{position:relative;min-height:0}
+.scene{
+  position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;transform:translateY(22px) scale(.985);filter:blur(10px);
+  transition:opacity .7s ease,transform .8s cubic-bezier(.2,.7,.2,1),filter .7s ease,visibility 0s .8s;
+}
+.scene.active{opacity:1;visibility:visible;transform:none;filter:none;transition-delay:0s}
+.wrap{margin:auto;width:100%;max-width:34rem;padding:.8rem 0}
+.center{text-align:center}
+.kicker{margin:0 0 .8rem;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--flame);font-weight:600}
+h1,h2{font-family:var(--font-display);font-weight:500;font-style:italic;line-height:1.08;margin:0 0 1rem;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(2.3rem,9.5vw,3.5rem)}
+h2{font-size:clamp(1.9rem,7.5vw,2.8rem)}
+p{margin:0 0 1rem}
+.lede{font-size:1.1rem;color:rgba(246,233,214,.9);text-wrap:pretty}
+.soft{color:var(--mute)}
+.rise{opacity:0}
+.scene.active .rise{animation:rise .9s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*.13s + .3s)}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* Lamparinas */
+.hidden-defs{position:absolute;width:0;height:0;overflow:hidden}
+.diya{width:100%;height:auto;display:block;overflow:visible}
+.diya .halo{opacity:0;transition:opacity 1.2s ease}
+.diya .flame{opacity:0;transform:scale(.15);transform-box:fill-box;transform-origin:50% 100%;transition:opacity .6s ease,transform .9s cubic-bezier(.2,.9,.3,1.3)}
+.lit .diya .halo{opacity:1}
+.lit .diya .flame{opacity:1;transform:scale(1);animation:flick 2.6s ease-in-out infinite .9s}
+@keyframes flick{0%,100%{transform:scale(1,1) skewX(0)}22%{transform:scale(.96,1.05) skewX(-2deg)}48%{transform:scale(1.03,.97) skewX(1.5deg)}75%{transform:scale(.98,1.04) skewX(-1deg)}}
+.lampbtn{background:none;border:0;padding:0;cursor:pointer;border-radius:20px}
+.lampbtn:focus-visible,.btn:focus-visible,.ghost:focus-visible,.card:focus-visible,.egg:focus-visible{outline:2px solid var(--flame);outline-offset:4px}
+.hero-diya{width:min(62vw,15rem);margin:0 auto 1.2rem;display:block}
+.hero-diya:not(.lit){animation:breathe 3s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.04)}}
+
+.btn{border:0;cursor:pointer;border-radius:999px;padding:.9rem 1.7rem;font-weight:600;font-size:1.02rem;
+  background:linear-gradient(135deg,var(--flame),var(--ember));color:#2a1424;
+  box-shadow:0 8px 28px -8px rgba(255,120,50,.65);transition:transform .2s,opacity .3s,box-shadow .3s}
+.btn:hover:not(:disabled){transform:translateY(-2px)}
+.btn:disabled{opacity:.3;cursor:default;box-shadow:none}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:10px;min-height:62px}
+.nav .btn,.nav .ghost{transition:opacity .4s}
+.nav [hidden]{display:none}
+
+/* Três luzes */
+.lamps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:.4rem 0 1.4rem}
+.lamps .lampbtn{padding:6px 2px}
+.lamp-label{display:block;text-align:center;font-size:.8rem;color:var(--mute);margin-top:2px}
+.note{font-family:var(--font-display);font-size:1.18rem;line-height:1.45;margin:0 0 .9rem;padding-left:1rem;border-left:2px solid var(--flame)}
+.note[hidden]{display:none}
+.note.in{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
+.hint{font-size:.9rem;color:var(--mute);min-height:1.4em}
+
+/* Contagem */
+.cd{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:1.2rem 0}
+.cd div{border:1px solid var(--line);border-radius:16px;padding:.8rem .2rem;text-align:center;background:rgba(255,255,255,.03)}
+.cd b{display:block;font-family:var(--font-display);font-size:clamp(1.7rem,8vw,2.4rem);font-weight:500;font-variant-numeric:tabular-nums;line-height:1}
+.cd span{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.cd[hidden]{display:none}
+.big-today{font-family:var(--font-display);font-style:italic;font-size:clamp(3rem,16vw,5rem);margin:1rem 0;color:var(--flame)}
+.big-today[hidden]{display:none}
+.egg{background:none;border:0;padding:0;color:var(--flame);font:inherit;cursor:pointer;border-bottom:1px dotted rgba(255,176,46,.5)}
+
+/* Cartões */
+.cards{display:grid;grid-template-columns:1fr;gap:12px;margin:1.2rem 0}
+@media(min-width:600px){.cards{grid-template-columns:repeat(3,1fr)}}
+.card{position:relative;height:12rem;background:none;border:0;padding:0;perspective:1000px;cursor:pointer;border-radius:18px}
+.card .inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+.card.flipped .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:18px;padding:1.15rem;display:flex;flex-direction:column;justify-content:flex-end;text-align:left;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.front{background:
+  radial-gradient(circle at 1px 1px,rgba(255,255,255,.18) 1px,transparent 1.5px) 0 0/16px 16px,
+  linear-gradient(160deg,var(--c1),var(--night-2));border:1px solid var(--line)}
+.front b{font-family:var(--font-display);font-style:italic;font-weight:500;font-size:1.9rem;line-height:1}
+.front small{color:rgba(246,233,214,.7);margin-top:.4rem}
+.back{background:var(--cream);color:#2a1424;transform:rotateY(180deg);justify-content:center}
+.back p{margin:0;font-size:1.02rem;line-height:1.5;font-weight:500}
+
+/* Final */
+.final-diya{width:min(70vw,17rem);margin:1rem auto 1.4rem;display:block}
+.final-diya:not(.lit){animation:breathe 3s ease-in-out infinite}
+.pre{transition:opacity .8s ease,transform .8s ease}
+.pre.fade{opacity:0;transform:translateY(-12px)}
+.pre[hidden],.letter[hidden]{display:none}
+.letter .hello{font-family:var(--font-display);font-style:italic;font-size:clamp(2.4rem,11vw,3.6rem);margin:0 0 .6rem;color:var(--flame);line-height:1}
+.letter p{font-size:1.08rem;line-height:1.65}
+.letter .sign{font-family:var(--font-display);font-style:italic;font-size:1.5rem;margin-top:1.4rem}
+.ps{border-top:1px solid var(--line);padding-top:1rem;margin-top:1.4rem}
+.ps[hidden]{display:none}
+.toast{position:absolute;left:50%;bottom:8px;transform:translate(-50%,16px);background:var(--cream);color:#2a1424;padding:.55rem 1rem;border-radius:999px;font-size:.92rem;font-weight:500;opacity:0;pointer-events:none;transition:all .5s ease;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .scene{filter:none}
+}
+</style>
+
+<svg class="hidden-defs" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="flameGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd36b"/><stop offset=".55" stop-color="#ffa024"/><stop offset="1" stop-color="#ff5a3c"/></linearGradient>
+    <radialGradient id="haloGrad"><stop offset="0" stop-color="#ffb02e" stop-opacity=".6"/><stop offset="1" stop-color="#ffb02e" stop-opacity="0"/></radialGradient>
+    <linearGradient id="clayGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d0693c"/><stop offset="1" stop-color="#6b2a30"/></linearGradient>
+  </defs>
+</svg>
+
+<div id="glow"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<div id="app">
+  <header class="top">
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <button class="ghost" id="sound" type="button" aria-pressed="true">Som: ligado</button>
+  </header>
+
+  <main class="stage" id="stage">
+
+    <section class="scene hero active" id="s0" aria-label="Início">
+      <div class="wrap center">
+        <p class="kicker rise" style="--i:0">Para a Diya</p>
+        <button class="lampbtn hero-diya rise" id="heroLamp" type="button" data-diya aria-label="Acender a lamparina" style="--i:1"></button>
+        <h1 class="rise" id="heroTitle" style="--i:2">Há uma coisa para ti.</h1>
+        <p class="lede rise" id="heroHint" style="--i:3">Toca na lamparina para a acender.</p>
+      </div>
+    </section>
+
+    <section class="scene" id="s1" aria-label="O teu nome">
+      <div class="wrap">
+        <p class="kicker rise" style="--i:0">O teu nome</p>
+        <h2 class="rise" style="--i:1">Diya quer dizer lamparina.</h2>
+        <p class="lede rise" style="--i:2">Aquelas pequeninas, de barro, que se acendem para pôr um bocadinho de luz num sítio escuro.</p>
+        <p class="lede rise" style="--i:3">Quando pensei no que te dar, achei que o teu nome já dizia metade do presente.</p>
+        <p class="lede rise" style="--i:4">Por isso comecei por aí. E fiz o resto com calma.</p>
+      </div>
+    </section>
+
+    <section class="scene" id="s2" aria-label="Três luzes">
+      <div class="wrap">
+        <p class="kicker rise" style="--i:0">Três luzes</p>
+        <h2 class="rise" style="--i:1">Acende uma de cada vez.</h2>
+        <div class="lamps rise" style="--i:2">
+          <div><button class="lampbtn" type="button" data-diya data-lamp="0" aria-label="Acender a primeira luz"></button><span class="lamp-label">primeira</span></div>
+          <div><button class="lampbtn" type="button" data-diya data-lamp="1" aria-label="Acender a segunda luz"></button><span class="lamp-label">segunda</span></div>
+          <div><button class="lampbtn" type="button" data-diya data-lamp="2" aria-label="Acender a terceira luz"></button><span class="lamp-label">terceira</span></div>
+        </div>
+        <p class="note" data-note="0" hidden>Ainda bem que te conheço. Parece uma frase simples, mas é a mais verdadeira que tenho.</p>
+        <p class="note" data-note="1" hidden>Contigo, os dias normais ficam um bocadinho melhores. Isso não é pouco.</p>
+        <p class="note" data-note="2" hidden>Não precisas de fazer nada de especial para mereceres isto. Hoje é só teu.</p>
+        <p class="hint" id="lampHint">Faltam três luzes.</p>
+      </div>
+    </section>
+
+    <section class="scene" id="s3" aria-label="O teu dia">
+      <div class="wrap">
+        <p class="kicker rise" style="--i:0">O teu dia</p>
+        <h2 class="rise" id="cdTitle" style="--i:1">O teu dia está quase a chegar.</h2>
+        <div class="cd rise" id="cd" style="--i:2">
+          <div><b id="cdD">0</b><span>dias</span></div>
+          <div><b id="cdH">0</b><span>horas</span></div>
+          <div><b id="cdM">0</b><span>min</span></div>
+          <div><b id="cdS">0</b><span>seg</span></div>
+        </div>
+        <div class="big-today" id="cdToday" hidden>Hoje</div>
+        <p class="lede rise" id="cdNote" style="--i:3">Terça-feira, <button class="egg" id="egg" type="button" aria-label="Um segredo">17</button> de novembro de 2026.</p>
+        <p class="soft rise" style="--i:4">Quis que isto estivesse pronto antes, para o dia começar já com uma luz acesa.</p>
+      </div>
+    </section>
+
+    <section class="scene" id="s4" aria-label="Um novo ano">
+      <div class="wrap">
+        <p class="kicker rise" style="--i:0">Para este novo ano</p>
+        <h2 class="rise" style="--i:1">Vira os três cartões.</h2>
+        <div class="cards rise" style="--i:2">
+          <button class="card" type="button" style="--c1:#7a2a52" aria-label="Cartão: Calma. Toca para virar">
+            <span class="inner"><span class="face front"><b>Calma</b><small>toca para virar</small></span><span class="face back"><p>Que tenhas manhãs sem pressa e noites em que dormes bem.</p></span></span>
+          </button>
+          <button class="card" type="button" style="--c1:#8a4a1c" aria-label="Cartão: Surpresas boas. Toca para virar">
+            <span class="inner"><span class="face front"><b>Surpresas boas</b><small>toca para virar</small></span><span class="face back"><p>Notícias boas, convites, pequenas vitórias. Daquelas que chegam sem ninguém esperar.</p></span></span>
+          </button>
+          <button class="card" type="button" style="--c1:#3b2f7a" aria-label="Cartão: Gargalhadas. Toca para virar">
+            <span class="inner"><span class="face front"><b>Gargalhadas</b><small>toca para virar</small></span><span class="face back"><p>Que tenhas muitas razões para rir até doer a barriga, de preferência com quem gostas.</p></span></span>
+          </button>
+        </div>
+        <p class="lede" id="cardsEnd" hidden>E que consigas tudo aquilo que tens vontade de conseguir. Eu fico a torcer por ti.</p>
+        <p class="hint" id="cardHint">Faltam três cartões.</p>
+      </div>
+    </section>
+
+    <section class="scene" id="s5" aria-label="Surpresa final">
+      <div class="wrap center" id="pre">
+        <div class="pre" id="preInner">
+          <p class="kicker rise" style="--i:0">Falta uma coisa</p>
+          <h2 class="rise" style="--i:1">Toca na chama.</h2>
+          <button class="lampbtn final-diya rise" id="finalLamp" type="button" data-diya aria-label="Tocar na chama" style="--i:2"></button>
+          <p class="soft rise" style="--i:3">Faz um pedido primeiro. Não precisas de me contar.</p>
+        </div>
+      </div>
+      <div class="wrap letter" id="letter" hidden>
+        <p class="hello rise" style="--i:0">Diya,</p>
+        <p class="lede rise" style="--i:1">Feliz aniversário.</p>
+        <p class="rise" style="--i:2">Passei algum tempo a pensar no que te oferecer e percebi que o mais importante era dizer isto: és uma amiga muito importante para mim, e mereces um dia só teu.</p>
+        <p class="rise" style="--i:3">Espero que hoje alguém te faça rir, te dê um abraço e te deixe comer o que quiseres. E que o próximo ano te devolva, em dobro, toda a luz que tu dás aos outros.</p>
+        <p class="rise" style="--i:4">Obrigado pela tua amizade.</p>
+        <p class="sign rise" style="--i:5">Bavas</p>
+        <button class="btn rise" id="psBtn" type="button" style="--i:6;margin-top:1.4rem">Há mais uma coisa…</button>
+        <div class="ps" id="ps" hidden>
+          <p class="lede">P.S. Este link não expira. Quando quiseres uma luz acesa, volta cá.</p>
+          <button class="ghost" id="again" type="button" style="padding-left:0">Voltar ao início</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <nav class="nav">
+    <button class="ghost" id="back" type="button">Voltar</button>
+    <button class="btn" id="next" type="button">Começar</button>
+  </nav>
+</div>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Lamparina em SVG */
+  function diya(){
+    var dots='';for(var x=48;x<=152;x+=26){dots+='<circle cx="'+x+'" cy="114" r="3"/>';}
+    return '<svg class="diya" viewBox="0 0 200 150" aria-hidden="true">'+
+      '<circle class="halo" cx="100" cy="58" r="70" fill="url(#haloGrad)"/>'+
+      '<path d="M18 84C30 92 62 96 100 96C138 96 170 92 182 84C180 120 146 134 100 134C54 134 20 120 18 84Z" fill="url(#clayGrad)"/>'+
+      '<ellipse cx="100" cy="84" rx="82" ry="12" fill="#2a1830"/>'+
+      '<g fill="#ffcf6b" opacity=".85">'+dots+'</g>'+
+      '<rect x="98.5" y="74" width="3" height="11" rx="1.5" fill="#3b2626"/>'+
+      '<g class="flame"><path d="M100 20C114 40 123 57 100 80C77 57 86 40 100 20Z" fill="url(#flameGrad)"/>'+
+      '<path d="M100 48C106 58 108 67 100 79C92 67 94 58 100 48Z" fill="#fff4d6" opacity=".92"/></g>'+
+    '</svg>';
+  }
+  $$('[data-diya]').forEach(function(el){el.insertAdjacentHTML('afterbegin',diya());});
+
+  /* Som: notas suaves geradas no browser (sem músicas protegidas) */
+  var soundOn=true, actx=null;
+  var notes=[392,440,523.25,587.33,659.25,783.99];
+  function chime(i){
+    if(!soundOn)return;
+    try{
+      if(!actx){actx=new (window.AudioContext||window.webkitAudioContext)();}
+      if(actx.state==='suspended'){actx.resume();}
+      var f=notes[i%notes.length], t=actx.currentTime;
+      [1,2.01].forEach(function(m,k){
+        var o=actx.createOscillator(), g=actx.createGain();
+        o.type='sine';o.frequency.value=f*m;
+        g.gain.setValueAtTime(0.0001,t);
+        g.gain.exponentialRampToValueAtTime(k?0.04:0.14,t+0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001,t+1.9);
+        o.connect(g);g.connect(actx.destination);
+        o.start(t);o.stop(t+2);
+      });
+    }catch(e){}
+  }
+  /* Música de fundo: tanpura e flauta lentas, geradas no browser (original, sem direitos) */
+  var mus={on:false,master:null,t1:null,t2:null,idx:0,last:2,prevF:0}, musicWanted=false;
+  function getCtx(){
+    if(!actx){actx=new (window.AudioContext||window.webkitAudioContext)();}
+    if(actx.state==='suspended'){actx.resume();}
+    return actx;
+  }
+  function impulse(){
+    var len=actx.sampleRate*3, buf=actx.createBuffer(2,len,actx.sampleRate);
+    for(var ch=0;ch<2;ch++){var d=buf.getChannelData(ch);for(var i=0;i<len;i++){d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6);}}
+    return buf;
+  }
+  function pluck(f,vol,dur,cut){
+    var t=actx.currentTime, o=actx.createOscillator(), o2=actx.createOscillator(), g=actx.createGain(), lp=actx.createBiquadFilter();
+    o.type='sawtooth';o2.type='sawtooth';o.frequency.value=f;o2.frequency.value=f*1.004;
+    lp.type='lowpass';lp.frequency.setValueAtTime(cut,t);lp.frequency.exponentialRampToValueAtTime(cut/3,t+dur);
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.03);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(lp);o2.connect(lp);lp.connect(g);g.connect(mus.master);
+    o.start(t);o2.start(t);o.stop(t+dur+.1);o2.stop(t+dur+.1);
+  }
+  var strings=[196,261.63,261.63,130.81];
+  function droneStep(){
+    if(!mus.on)return;
+    pluck(strings[mus.idx%4],0.05,5.5,1800);mus.idx++;
+    mus.t1=setTimeout(droneStep,1700);
+  }
+  var raga=[261.63,293.66,329.63,392,440,523.25,587.33];
+  function melodyStep(){
+    if(!mus.on)return;
+    if(Math.random()>.2){
+      var steps=[-2,-1,-1,1,1,2];
+      mus.last=Math.max(0,Math.min(raga.length-1,mus.last+steps[Math.floor(Math.random()*steps.length)]));
+      var f=raga[mus.last], t=actx.currentTime;
+      var o=actx.createOscillator(), lfo=actx.createOscillator(), lg=actx.createGain(), g=actx.createGain();
+      o.type='triangle';
+      o.frequency.setValueAtTime(mus.prevF||f,t);o.frequency.linearRampToValueAtTime(f,t+.22);
+      lfo.frequency.value=4.6;lg.gain.value=f*.007;lfo.connect(lg);lg.connect(o.frequency);
+      g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.08,t+.3);g.gain.exponentialRampToValueAtTime(.0001,t+4.2);
+      o.connect(g);g.connect(mus.master);
+      o.start(t);lfo.start(t);o.stop(t+4.3);lfo.stop(t+4.3);
+      mus.prevF=f;
+    }
+    mus.t2=setTimeout(melodyStep,2600+Math.random()*2400);
+  }
+  function synthStart(){
+    if(mus.on)return;
+    try{
+      getCtx();
+      if(!mus.master){
+        mus.master=actx.createGain();mus.master.gain.value=0;
+        var conv=actx.createConvolver();conv.buffer=impulse();
+        var wet=actx.createGain();wet.gain.value=.55;
+        mus.master.connect(actx.destination);mus.master.connect(conv);conv.connect(wet);wet.connect(actx.destination);
+      }
+      mus.on=true;
+      mus.master.gain.cancelScheduledValues(actx.currentTime);
+      mus.master.gain.linearRampToValueAtTime(1,actx.currentTime+4);
+      droneStep();mus.t2=setTimeout(melodyStep,3500);
+    }catch(e){mus.on=false;}
+  }
+  function synthStop(){
+    mus.on=false;clearTimeout(mus.t1);clearTimeout(mus.t2);
+    try{if(mus.master){mus.master.gain.cancelScheduledValues(actx.currentTime);mus.master.gain.linearRampToValueAtTime(0,actx.currentTime+.6);}}catch(e){}
+  }
+  /* Faixa de fundo (music.mp3), em ciclo e baixinha; se falhar, usa a música gerada */
+  var track=null, trackFailed=false, trackOk=false, fade=null, TRACK_VOL=.22;
+  function fadeTrack(to,ms,done){
+    clearInterval(fade);
+    if(!track)return;
+    var from=track.volume, steps=Math.max(1,Math.round(ms/50)), i=0;
+    fade=setInterval(function(){
+      i++;track.volume=Math.max(0,Math.min(1,from+(to-from)*i/steps));
+      if(i>=steps){clearInterval(fade);if(done)done();}
+    },50);
+  }
+  function musicStart(){
+    if(!trackFailed){
+      try{
+        if(!track){
+          track=new Audio('music.mp3');track.loop=true;track.volume=0;track.preload='auto';
+          track.addEventListener('error',function(){
+            if(!trackOk){trackFailed=true;if(musicWanted&&soundOn&&!document.hidden)synthStart();}
+          });
+        }
+        var pr=track.play();
+        if(pr&&pr.then){
+          pr.then(function(){trackOk=true;fadeTrack(TRACK_VOL,3500);}).catch(function(){
+            if(!trackOk){trackFailed=true;if(musicWanted&&soundOn)synthStart();}
+          });
+        }else{trackOk=true;fadeTrack(TRACK_VOL,3500);}
+        return;
+      }catch(e){trackFailed=true;}
+    }
+    synthStart();
+  }
+  function musicStop(){
+    synthStop();
+    if(track){fadeTrack(0,500,function(){try{track.pause();}catch(e){}});}
+  }
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){musicStop();}
+    else if(musicWanted&&soundOn){musicStart();}
+  });
+  $('#sound').addEventListener('click',function(){
+    soundOn=!soundOn;this.textContent='Som: '+(soundOn?'ligado':'desligado');this.setAttribute('aria-pressed',String(soundOn));
+    if(soundOn){chime(2);if(musicWanted)musicStart();}else{musicStop();}
+  });
+
+  /* Partículas: faíscas, brasas e lanternas */
+  var cv=$('#fx'), c=cv.getContext('2d'), W=0,H=0;
+  function size(){
+    var dpr=Math.min(window.devicePixelRatio||1,2);
+    W=window.innerWidth;H=window.innerHeight;
+    cv.width=W*dpr;cv.height=H*dpr;c.setTransform(dpr,0,0,dpr,0,0);
+  }
+  size();window.addEventListener('resize',size);
+  var P=[], ambient=false, last=0, acc=0;
+  function burst(x,y,n,spread){
+    if(reduce)n=Math.ceil(n/3);
+    for(var i=0;i<n;i++){
+      var a=Math.random()*6.283, s=40+Math.random()*(spread||180);
+      P.push({k:0,x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-50,life:0,max:.9+Math.random()*.9,r:1+Math.random()*2,h:28+Math.random()*28});
+    }
+  }
+  function burstAt(el,n,spread){
+    var r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+r.height*.35,n,spread);
+  }
+  function lantern(delay){
+    setTimeout(function(){
+      P.push({k:1,x:20+Math.random()*(W-40),y:H+40,vy:-(35+Math.random()*45),ph:Math.random()*6.28,sw:10+Math.random()*18,s:11+Math.random()*9,life:0,h:20+Math.random()*26});
+    },delay);
+  }
+  function ember(){
+    P.push({k:2,x:Math.random()*W,y:H+10,vx:(Math.random()-.5)*10,vy:-(12+Math.random()*20),life:0,max:6+Math.random()*5,r:.6+Math.random()*1.4,h:25+Math.random()*25});
+  }
+  function frame(t){
+    var dt=Math.min((t-last)/1000||0,.05);last=t;
+    c.clearRect(0,0,W,H);c.globalCompositeOperation='lighter';
+    if(ambient&&!reduce){acc+=dt;while(acc>.35){acc-=.35;if(P.length<140)ember();}}
+    for(var i=P.length-1;i>=0;i--){
+      var p=P[i];p.life+=dt;
+      if(p.k===0){
+        p.vy+=160*dt;p.vx*=.985;p.x+=p.vx*dt;p.y+=p.vy*dt;
+        var a=1-p.life/p.max;if(a<=0){P.splice(i,1);continue;}
+        c.fillStyle='hsla('+p.h+',100%,65%,'+a+')';c.beginPath();c.arc(p.x,p.y,p.r,0,6.283);c.fill();
+      }else if(p.k===1){
+        p.y+=p.vy*dt;
+        if(p.y<-90){P.splice(i,1);continue;}
+        var x=p.x+Math.sin(p.ph+p.life*.8)*p.sw;
+        var al=Math.min(1,p.life*1.2)*Math.min(1,(p.y+90)/220);
+        var g=c.createRadialGradient(x,p.y,0,x,p.y,p.s*2.6);
+        g.addColorStop(0,'hsla('+p.h+',100%,65%,'+(.55*al)+')');g.addColorStop(1,'hsla('+p.h+',100%,60%,0)');
+        c.fillStyle=g;c.beginPath();c.arc(x,p.y,p.s*2.6,0,6.283);c.fill();
+        c.fillStyle='hsla('+(p.h+8)+',100%,72%,'+(.9*al)+')';
+        c.beginPath();c.ellipse(x,p.y,p.s*.55,p.s*.75,0,0,6.283);c.fill();
+      }else{
+        p.x+=p.vx*dt;p.y+=p.vy*dt;
+        var ph=p.life/p.max;if(ph>=1||p.y<-10){P.splice(i,1);continue;}
+        var al2=Math.sin(ph*3.1416)*.8;
+        c.fillStyle='hsla('+p.h+',100%,62%,'+al2+')';c.beginPath();c.arc(p.x,p.y,p.r,0,6.283);c.fill();
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* Navegação entre cenas */
+  var scenes=$$('.scene'), cur=0;
+  var done=[false,true,false,true,false,true];
+  var labels=['Começar','Próximo','Próximo','Próximo','Próximo',''];
+  var dotsEl=$('#dots');
+  scenes.forEach(function(){dotsEl.appendChild(document.createElement('i'));});
+  var dotEls=$$('#dots i'), nextB=$('#next'), backB=$('#back');
+
+  function refresh(){
+    dotEls.forEach(function(d,i){d.className=(i<=cur?'on':'')+(i===cur?' now':'');});
+    nextB.textContent=labels[cur];
+    nextB.hidden=(cur===scenes.length-1);
+    nextB.disabled=!done[cur];
+    backB.style.visibility=(cur===0)?'hidden':'visible';
+  }
+  function go(n){
+    n=Math.max(0,Math.min(scenes.length-1,n));
+    if(n===cur)return;
+    scenes[cur].classList.remove('active');
+    cur=n;
+    scenes[cur].classList.add('active');
+    scenes[cur].scrollTop=0;
+    if(cur===3)tick();
+    refresh();
+  }
+  nextB.addEventListener('click',function(){if(done[cur]){chime(cur);go(cur+1);}});
+  backB.addEventListener('click',function(){go(cur-1);});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'&&done[cur]&&cur<scenes.length-1)go(cur+1);
+    if(e.key==='ArrowLeft')go(cur-1);
+  });
+
+  function warm(){document.body.classList.add('lit');ambient=true;}
+  function toast(msg){
+    var t=$('#toast');t.textContent=msg;t.classList.add('show');
+    clearTimeout(toast.h);toast.h=setTimeout(function(){t.classList.remove('show');},2800);
+  }
+  function restart(el,txt){
+    el.textContent=txt;el.style.animation='none';void el.offsetWidth;el.style.animation='';
+  }
+
+  /* Cena 0: acender a lamparina */
+  var heroLamp=$('#heroLamp');
+  heroLamp.addEventListener('click',function(){
+    if(heroLamp.classList.contains('lit'))return;
+    heroLamp.classList.add('lit');warm();chime(0);
+    musicWanted=true;if(soundOn)musicStart();
+    burstAt(heroLamp,34,200);
+    restart($('#heroTitle'),'Olá, Diya.');
+    restart($('#heroHint'),'Preparei isto com calma. Vai devagar, que é melhor assim.');
+    done[0]=true;refresh();
+  });
+
+  /* Cena 2: três luzes */
+  var lit=0;
+  $$('[data-lamp]').forEach(function(b){
+    b.addEventListener('click',function(){
+      if(b.classList.contains('lit'))return;
+      b.classList.add('lit');
+      var n=+b.getAttribute('data-lamp');
+      var note=$('[data-note="'+n+'"]');note.hidden=false;note.classList.add('in');
+      chime([1,3,4][n]);burstAt(b,18,150);
+      lit++;
+      if(lit<3){$('#lampHint').textContent=lit===2?'Falta uma luz.':'Faltam duas luzes.';}
+      else{$('#lampHint').textContent='Todas acesas. Podes avançar.';done[2]=true;burstAt(b,30,220);refresh();}
+    });
+  });
+
+  /* Cena 3: contagem */
+  var target=new Date(2026,10,17,0,0,0), timer=null;
+  function pad(n){return n<10?'0'+n:''+n;}
+  function tick(){
+    var now=new Date(), d=target-now;
+    var cd=$('#cd'), today=$('#cdToday'), title=$('#cdTitle'), note=$('#cdNote');
+    if(d>0){
+      var s=Math.floor(d/1000);
+      $('#cdD').textContent=Math.floor(s/86400);
+      $('#cdH').textContent=pad(Math.floor(s%86400/3600));
+      $('#cdM').textContent=pad(Math.floor(s%3600/60));
+      $('#cdS').textContent=pad(s%60);
+      cd.hidden=false;today.hidden=true;
+    }else{
+      var same=now.getFullYear()===2026&&now.getMonth()===10&&now.getDate()===17;
+      cd.hidden=true;today.hidden=!same;
+      title.textContent=same?'É hoje. Parabéns!':'O teu dia foi a 17 de novembro.';
+      if(!same){note.style.display='none';}
+    }
+    clearTimeout(timer);
+    if(cur===3)timer=setTimeout(tick,1000);
+  }
+  var eggN=0;
+  $('#egg').addEventListener('click',function(){
+    eggN++;chime(eggN%6);
+    var r=this.getBoundingClientRect();burst(r.left+r.width/2,r.top,10,120);
+    if(eggN===3){burst(W/2,H/2,70,300);toast('Encontraste o segredo. Parabéns pela atenção!');}
+  });
+
+  /* Cena 4: cartões */
+  var flipped=0;
+  $$('.card').forEach(function(card,i){
+    card.addEventListener('click',function(){
+      var was=card.classList.contains('flipped');
+      card.classList.toggle('flipped');
+      chime(i+2);
+      if(!was){
+        flipped++;burstAt(card,14,140);
+        if(flipped<3){$('#cardHint').textContent=flipped===2?'Falta um cartão.':'Faltam dois cartões.';}
+        else{$('#cardHint').hidden=true;$('#cardsEnd').hidden=false;done[4]=true;refresh();}
+      }
+    });
+  });
+
+  /* Cena 5: a surpresa final */
+  var finalLamp=$('#finalLamp'), released=false;
+  finalLamp.addEventListener('click',function(){
+    if(released)return;released=true;
+    finalLamp.classList.add('lit');warm();
+    [0,2,4,5].forEach(function(n,i){setTimeout(function(){chime(n);},i*220);});
+    burstAt(finalLamp,90,320);
+    var count=reduce?6:24;
+    for(var i=0;i<count;i++)lantern(i*190);
+    $('#preInner').classList.add('fade');
+    setTimeout(function(){
+      $('#pre').hidden=true;
+      $('#letter').hidden=false;
+      scenes[5].scrollTop=0;
+    },950);
+  });
+  $('#psBtn').addEventListener('click',function(){
+    this.hidden=true;$('#ps').hidden=false;chime(5);burst(W/2,H*.6,40,260);
+    for(var i=0;i<8;i++)lantern(i*250);
+    setTimeout(function(){var p=$('#ps');if(p.scrollIntoView)p.scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});},200);
+  });
+  $('#again').addEventListener('click',function(){go(0);});
+
+  refresh();
+})();
+</script>
